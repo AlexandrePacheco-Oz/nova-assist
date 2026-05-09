@@ -96,7 +96,10 @@
             document.getElementById('status-text').innerHTML = '<span class="pulse" style="background:#3b82f6"></span> Técnico Conectado';
 
             conn.on('data', (data) => {
-                if (data.type === 'request_stream') startTransmission(conn.peer);
+                if (data.type === 'request_stream') {
+                    console.log("Pedido de stream recebido!");
+                    startTransmission(conn.peer);
+                }
                 if (data.type === 'pointer') showPointer(data.x, data.y);
                 if (data.type === 'chat') addChatMessage('Técnico', data.msg);
             });

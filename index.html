@@ -138,6 +138,15 @@
                             <i data-lucide="send" size="20"></i>
                         </button>
                     </div>
+
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                            <button onclick="requestNewStream()" class="btn-action" style="background: var(--primary); font-size: 0.8rem; padding: 0.5rem;">
+                                <i data-lucide="refresh-cw"></i> Recarregar Vídeo
+                            </button>
+                            <button onclick="stopViewing()" class="btn-stop" style="font-size: 0.8rem; padding: 0.5rem;">
+                                Finalizar
+                            </button>
+                    </div>
                     
                     <div class="id-badge">
                         <span class="id-text" id="my-id">Gerando...</span>
@@ -306,15 +315,24 @@
                 document.getElementById('live-stream').style.display = 'block';
                 updateStatus('receiver', 'Conectado! Solicitando imagem...');
                 
-                // Aguarda 1.5 segundos para garantir que o canal de dados está estável
+                // Ativa o recebimento de dados do cliente (Chat)
+                conn.on('data', (data) => {
+                    if (data.type === 'chat') addChatMessage('Cliente', data.msg);
+                });
+
                 setTimeout(() => {
-                    console.log("Enviando solicitação de stream...");
                     conn.send({ type: 'request_stream' });
-                    conn.send({ type: 'chat', msg: 'Conectado com sucesso! Por favor, aceite o compartilhamento de tela no seu aparelho.' });
-                }, 1500);
+                }, 1000);
             });
 
             conn.on('close', () => stopViewing());
+        }
+
+        function requestNewStream() {
+            if (currentConn) {
+                updateStatus('receiver', 'Reiniciando vídeo...');
+                currentConn.send({ type: 'request_stream' });
+            }
         }
 
         function sendPointer(e) {
