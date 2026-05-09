@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Assist | Suporte Remoto Premium</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0a0a0c;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --secondary: #8b5cf6;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
+        }
+
+        /* Navbar */
+        nav {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Layout Main */
+        main {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Cards */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hero-section {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Selection Mode */
+        .mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .mode-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mode-btn:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.05);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px var(--primary-glow);
+        }
+
+        .mode-btn i {
+            color: var(--primary);
+            width: 32px;
+            height: 32px;
+        }
+
+        .mode-btn h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .mode-btn p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* Interface Views */
+        .view {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Components */
+        .id-badge {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px dashed var(--primary);
+            padding: 1rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 1.5rem 0;
+        }
+
+        .id-text {
+            font-family: monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 2px;
+        }
+
+        .btn-action {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            filter: brightness(1.1);
+            transform: scale(1.02);
+        }
+
+        .btn-action:disabled {
+            background: #334155;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .input-field {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--card-border);
+            padding: 1rem;
+            border-radius: 12px;
+            color: white;
+            width: 100%;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: var(--primary);
+        }
+
+        /* Stream Container */
+        .stream-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .status-online { background: var(--success); box-shadow: 0 0 10px var(--success); }
+        .status-offline { background: var(--error); }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+        }
+
+        .back-link:hover { color: var(--text-main); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .mode-selector { grid-template-columns: 1fr; }
+            h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">
+            <i data-lucide="shield-check"></i>
+            Nova Assist
+        </div>
+        <div id="connection-status">
+            <span class="status-dot status-offline" id="peer-status-dot"></span>
+            <span id="peer-status-text">Desconectado</span>
+        </div>
+    </nav>
+
+    <main>
+        <div class="container">
+            
+            <!-- Welcome View -->
+            <div id="view-welcome" class="view active">
+                <div class="hero-section">
+                    <h1>Como podemos ajudar hoje?</h1>
+                    <p class="subtitle">Escolha uma opção para iniciar o compartilhamento de tela de forma segura e rápida.</p>
+                </div>
+
+                <div class="mode-selector">
+                    <div class="mode-btn" onclick="switchView('sender')">
+                        <i data-lucide="monitor-up"></i>
+                        <h3>Quero Suporte</h3>
+                        <p>Vou compartilhar minha tela para que o técnico possa me ajudar.</p>
+                    </div>
+                    <div class="mode-btn" onclick="switchView('receiver')">
+                        <i data-lucide="eye"></i>
+                        <h3>Sou o Técnico</h3>
+                        <p>Vou visualizar a tela de um cliente para prestar suporte.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sender View (Client) -->
+            <div id="view-sender" class="view">
+                <div class="glass-card">
+                    <a onclick="switchView('welcome')" class="back-link">
+                        <i data-lucide="arrow-left"></i> Voltar
+                    </a>
+                    <h2>Compartilhar Minha Tela</h2>
+                    <p class="subtitle" style="margin: 1rem 0;">Passe o código abaixo para o técnico e clique em iniciar quando estiver pronto.</p>
+                    
+                    <div class="id-badge">
+                        <span class="id-text" id="my-id">Gerando...</span>
+                        <button onclick="copyId()" style="background:none; border:none; color:var(--primary); cursor:pointer;">
+                            <i data-lucide="copy"></i>
+                        </button>
+                    </div>
+
+                    <button id="start-btn" class="btn-action" onclick="startSharing()" disabled>
+                        <i data-lucide="play"></i>
+                        Iniciar Compartilhamento
+                    </button>
+
+                    <div id="sender-status" style="margin-top: 1.5rem; text-align: center; color: var(--text-muted);">
+                        Aguardando conexão do técnico...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Receiver View (Technical) -->
+            <div id="view-receiver" class="view">
+                <div class="glass-card">
+                    <a onclick="switchView('welcome')" class="back-link">
+                        <i data-lucide="arrow-left"></i> Voltar
+                    </a>
+                    
+                    <div id="setup-receiver">
+                        <h2>Conectar ao Cliente</h2>
+                        <p class="subtitle" style="margin: 1rem 0;">Insira o código de acesso fornecido pelo seu cliente.</p>
+                        
+                        <input type="text" id="remote-id" class="input-field" placeholder="Ex: nova-1234-abcd">
+                        <button id="connect-btn" class="btn-action" onclick="connectToPeer()">
+                            <i data-lucide="zap"></i>
+                            Conectar Agora
+                        </button>
+                    </div>
+
+                    <div id="live-stream" style="display: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                            <h2 style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span class="status-dot status-online"></span> Ao Vivo
+                            </h2>
+                            <button onclick="stopViewing()" class="btn-action" style="background: var(--error); width: auto; padding: 0.5rem 1rem;">
+                                Desconectar
+                            </button>
+                        </div>
+                        <div class="stream-container">
+                            <video id="remote-video" autoplay playsinline></video>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        let peer;
+        let currentCall;
+        let localStream;
+
+        // View Navigation
+        function switchView(viewId) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+            
+            if (viewId === 'sender' && !peer) {
+                initPeer();
+            } else if (viewId === 'receiver' && !peer) {
+                initPeer();
+            }
+        }
+
+        // Initialize PeerJS
+        function initPeer() {
+            peer = new Peer('nova-' + Math.random().toString(36).substr(2, 6), {
+                debug: 2
+            });
+
+            peer.on('open', (id) => {
+                const idEl = document.getElementById('my-id');
+                if (idEl) idEl.innerText = id;
+                
+                document.getElementById('peer-status-dot').className = 'status-dot status-online';
+                document.getElementById('peer-status-text').innerText = 'Online';
+                
+                const startBtn = document.getElementById('start-btn');
+                if (startBtn) startBtn.disabled = false;
+            });
+
+            peer.on('error', (err) => {
+                console.error(err);
+                alert('Erro na conexão: ' + err.type);
+            });
+
+            // Handle incoming calls (Sender side)
+            peer.on('call', (call) => {
+                if (confirm('O técnico deseja visualizar sua tela. Permitir?')) {
+                    navigator.mediaDevices.getDisplayMedia({
+                        video: { cursor: "always" },
+                        audio: false
+                    }).then(stream => {
+                        localStream = stream;
+                        call.answer(stream);
+                        currentCall = call;
+                        
+                        document.getElementById('sender-status').innerText = '✅ Compartilhando tela com o técnico';
+                        document.getElementById('start-btn').disabled = true;
+
+                        // Stop sharing when track ends
+                        stream.getVideoTracks()[0].onended = () => {
+                            stopSharing();
+                        };
+                    });
+                }
+            });
+        }
+
+        // Sender Logic
+        async function startSharing() {
+            document.getElementById('sender-status').innerText = 'Aguardando o técnico inserir seu código...';
+            // Em WebRTC/PeerJS, o sender geralmente aguarda o receiver ligar.
+            // Mas podemos mostrar um aviso.
+        }
+
+        function stopSharing() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+            }
+            if (currentCall) {
+                currentCall.close();
+            }
+            document.getElementById('sender-status').innerText = 'Aguardando conexão do técnico...';
+            document.getElementById('start-btn').disabled = false;
+        }
+
+        // Receiver Logic
+        function connectToPeer() {
+            const remoteId = document.getElementById('remote-id').value;
+            if (!remoteId) return alert('Por favor, insira o ID do cliente.');
+
+            // Em PeerJS para Screen Share, o receptor inicia a chamada sem stream 
+            // e espera o sender responder com o stream da tela.
+            // Mas o padrão mais comum é o receptor solicitar.
+            
+            // Vamos usar a lógica de "Call" onde o receptor inicia
+            const call = peer.call(remoteId, null); // Call without sending stream
+            
+            document.getElementById('connect-btn').innerText = 'Conectando...';
+            document.getElementById('connect-btn').disabled = true;
+
+            call.on('stream', (remoteStream) => {
+                document.getElementById('setup-receiver').style.display = 'none';
+                document.getElementById('live-stream').style.display = 'block';
+                
+                const video = document.getElementById('remote-video');
+                video.srcObject = remoteStream;
+                currentCall = call;
+            });
+
+            call.on('close', () => {
+                stopViewing();
+            });
+
+            call.on('error', (err) => {
+                alert('Erro ao conectar: ' + err);
+                stopViewing();
+            });
+        }
+
+        function stopViewing() {
+            if (currentCall) currentCall.close();
+            document.getElementById('setup-receiver').style.display = 'block';
+            document.getElementById('live-stream').style.display = 'none';
+            document.getElementById('connect-btn').innerText = 'Conectar Agora';
+            document.getElementById('connect-btn').disabled = false;
+        }
+
+        function copyId() {
+            const id = document.getElementById('my-id').innerText;
+            navigator.clipboard.writeText(id);
+            alert('Código copiado: ' + id);
+        }
+    </script>
+</body>
+</html>
