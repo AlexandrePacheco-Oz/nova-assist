@@ -120,10 +120,10 @@
                     
                     <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid var(--primary); padding: 1.5rem; border-radius: 20px; margin-bottom: 2rem; text-align: center;">
                         <h3 style="margin-bottom: 0.5rem;">🚀 Experiência Completa</h3>
-                        <p style="font-size: 0.9rem; margin-bottom: 1rem;">Para um suporte mais estável e rápido, use nossa ferramenta oficial.</p>
-                        <button onclick="installPWA()" class="btn-action" style="background: var(--secondary); width: auto; padding: 0.8rem 1.5rem;">
-                            <i data-lucide="download"></i> Instalar App de Suporte (Seguro)
-                        </button>
+                        <p style="font-size: 0.9rem; margin-bottom: 1rem;">Para suporte profissional sem travamentos, baixe nossa ferramenta.</p>
+                        <a href="NovaAssist.exe" class="btn-action" style="text-decoration: none; background: var(--secondary); width: auto; display: inline-flex; padding: 0.8rem 1.5rem;">
+                            <i data-lucide="download"></i> Baixar Ferramenta Desktop (.exe)
+                        </a>
                     </div>
 
                     <h2>Meu Código de Acesso Web</h2>
@@ -132,8 +132,13 @@
                         <button onclick="copyId()" style="background:none; border:none; color:var(--primary); cursor:pointer;"><i data-lucide="copy"></i></button>
                     </div>
                     
-                    <div style="display: flex; gap: 1rem;">
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
                         <button id="start-btn" class="btn-action" onclick="setMode('screen')" disabled><i data-lucide="monitor"></i> Compartilhar Tela (Navegador)</button>
+                        
+                        <!-- BOTÃO DE EMERGÊNCIA -->
+                        <button onclick="startTransmission(currentConn ? currentConn.peer : null)" class="btn-action" style="background: #1d4ed8; font-size: 0.9rem;">
+                            <i data-lucide="play"></i> Se a tela não aparecer, clique aqui para FORÇAR
+                        </button>
                     </div>
                     <div id="sender-status" style="margin-top: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; background: rgba(255,255,255,0.05); padding: 0.8rem; border-radius: 12px;">Aguardando técnico...</div>
                 </div>
