@@ -349,7 +349,7 @@
                         </button>
                     </div>
 
-                    <div id="sender-status" style="margin-top: 1.5rem; text-align: center; color: var(--text-muted);">
+                    <div id="sender-status" style="margin-top: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.85rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px;">
                         Aguardando conexão do técnico...
                     </div>
                 </div>
@@ -371,6 +371,7 @@
                             <i data-lucide="zap"></i>
                             Conectar Agora
                         </button>
+                        <div id="receiver-status" style="margin-top: 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;"></div>
                     </div>
 
                     <div id="live-stream" style="display: none;">
@@ -401,6 +402,11 @@
         let localStream;
         let shareType = 'screen';
 
+        function updateStatus(view, msg) {
+            const el = document.getElementById(view + '-status');
+            if (el) el.innerText = msg;
+        }
+
         // Check if Mobile
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         if (isMobile) {
@@ -419,9 +425,19 @@
 
         // Initialize PeerJS
         function initPeer() {
-            peer = new Peer('nova-' + Math.random().toString(36).substr(2, 6), {
-                debug: 2
-            });
+            // ICE Servers to help bypass Firewalls (Google STUN)
+            const config = {
+                debug: 2,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun2.l.google.com:19302' },
+                    ]
+                }
+            };
+
+            peer = new Peer('nova-' + Math.random().toString(36).substr(2, 6), config);
 
             peer.on('open', (id) => {
                 const idEl = document.getElementById('my-id');
@@ -432,23 +448,28 @@
                 
                 if (document.getElementById('start-btn')) document.getElementById('start-btn').disabled = false;
                 if (document.getElementById('camera-btn')) document.getElementById('camera-btn').disabled = false;
+                console.log('Peer ID: ' + id);
             });
 
             peer.on('error', (err) => {
-                console.error(err);
+                console.error('PeerJS Error:', err);
+                updateStatus('sender', 'Erro: ' + err.type);
+                updateStatus('receiver', 'Erro: ' + err.type);
+                
                 if (err.type === 'peer-unavailable') {
                     alert('Código inválido ou cliente desconectado.');
                     stopViewing();
-                } else {
-                    alert('Erro na conexão: ' + err.type);
                 }
             });
 
             // Handle incoming calls (Sender side)
             peer.on('call', async (call) => {
+                updateStatus('sender', 'Solicitação de conexão recebida...');
                 const modeText = shareType === 'screen' ? 'sua tela' : 'sua câmera';
+                
                 if (confirm(`O técnico deseja visualizar ${modeText}. Permitir?`)) {
                     try {
+                        updateStatus('sender', 'Acessando mídia...');
                         let stream;
                         if (shareType === 'screen') {
                             stream = await navigator.mediaDevices.getDisplayMedia({
@@ -457,7 +478,7 @@
                             });
                         } else {
                             stream = await navigator.mediaDevices.getUserMedia({
-                                video: { facingMode: "environment" }, // Rear camera
+                                video: { facingMode: "environment" },
                                 audio: false
                             });
                         }
@@ -466,15 +487,17 @@
                         call.answer(stream);
                         currentCall = call;
                         
-                        document.getElementById('sender-status').innerText = `✅ Compartilhando ${modeText} com o técnico`;
+                        updateStatus('sender', `✅ Transmitindo ${modeText}...`);
                         document.getElementById('start-btn').disabled = true;
                         document.getElementById('camera-btn').disabled = true;
 
                         stream.getVideoTracks()[0].onended = () => stopSharing();
                     } catch (err) {
-                        console.error(err);
-                        alert('Não foi possível acessar a mídia: ' + err.message);
+                        console.error('Media Error:', err);
+                        updateStatus('sender', 'Erro ao acessar mídia: ' + err.message);
                     }
+                } else {
+                    updateStatus('sender', 'Conexão recusada pelo usuário.');
                 }
             });
         }
@@ -483,7 +506,7 @@
         function startSharing(type) {
             shareType = type;
             const modeText = type === 'screen' ? 'TELA' : 'CÂMERA';
-            document.getElementById('sender-status').innerText = `Modo ${modeText} selecionado. Aguardando o técnico...`;
+            updateStatus('sender', `Modo ${modeText} pronto. Aguardando técnico...`);
         }
 
         function stopSharing() {
@@ -493,22 +516,34 @@
             if (currentCall) {
                 currentCall.close();
             }
-            document.getElementById('sender-status').innerText = 'Aguardando conexão do técnico...';
+            updateStatus('sender', 'Aguardando conexão do técnico...');
             document.getElementById('start-btn').disabled = false;
             document.getElementById('camera-btn').disabled = false;
         }
 
         // Receiver Logic
         function connectToPeer() {
-            const remoteId = document.getElementById('remote-id').value;
+            const remoteId = document.getElementById('remote-id').value.trim();
             if (!remoteId) return alert('Por favor, insira o ID do cliente.');
 
+            updateStatus('receiver', 'Tentando contato com o cliente...');
             const call = peer.call(remoteId, null);
             
             document.getElementById('connect-btn').innerText = 'Conectando...';
             document.getElementById('connect-btn').disabled = true;
 
+            // Timeout if connection takes too long
+            const timeout = setTimeout(() => {
+                if (document.getElementById('live-stream').style.display === 'none') {
+                    updateStatus('receiver', 'Tempo esgotado. Verifique o código ou a internet do cliente.');
+                    document.getElementById('connect-btn').innerText = 'Conectar Agora';
+                    document.getElementById('connect-btn').disabled = false;
+                }
+            }, 15000);
+
             call.on('stream', (remoteStream) => {
+                clearTimeout(timeout);
+                updateStatus('receiver', 'Conexão estabelecida!');
                 document.getElementById('setup-receiver').style.display = 'none';
                 document.getElementById('live-stream').style.display = 'block';
                 
@@ -518,6 +553,12 @@
             });
 
             call.on('close', () => stopViewing());
+            
+            call.on('error', (err) => {
+                console.error('Call Error:', err);
+                updateStatus('receiver', 'Erro na chamada: ' + err);
+                stopViewing();
+            });
         }
 
         function stopViewing() {
@@ -526,6 +567,7 @@
             document.getElementById('live-stream').style.display = 'none';
             document.getElementById('connect-btn').innerText = 'Conectar Agora';
             document.getElementById('connect-btn').disabled = false;
+            updateStatus('receiver', '');
         }
 
         function copyId() {
