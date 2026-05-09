@@ -116,17 +116,23 @@
             <div id="view-sender" class="view">
                 <div class="glass-card">
                     <a onclick="switchView('welcome')" class="back-link"><i data-lucide="arrow-left"></i> Voltar</a>
-                    <h2>Meu Código de Acesso</h2>
+                    
+                    <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid var(--primary); padding: 1.5rem; border-radius: 20px; margin-bottom: 2rem; text-align: center;">
+                        <h3 style="margin-bottom: 0.5rem;">🚀 Experiência Completa</h3>
+                        <p style="font-size: 0.9rem; margin-bottom: 1rem;">Para um suporte mais estável e rápido, use nossa ferramenta oficial.</p>
+                        <a href="landing.html" class="btn-action" style="text-decoration: none; background: var(--secondary);">
+                            <i data-lucide="download"></i> Baixar Ferramenta Desktop
+                        </a>
+                    </div>
+
+                    <h2>Meu Código de Acesso Web</h2>
                     <div class="id-badge">
                         <span class="id-text" id="my-id">Gerando...</span>
                         <button onclick="copyId()" style="background:none; border:none; color:var(--primary); cursor:pointer;"><i data-lucide="copy"></i></button>
                     </div>
-                    <div id="mobile-warning" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; color: #fca5a5; font-size: 0.9rem;">
-                        <i data-lucide="alert-triangle"></i> No celular, prefira a **Câmera**.
-                    </div>
+                    
                     <div style="display: flex; gap: 1rem;">
-                        <button id="start-btn" class="btn-action" onclick="setMode('screen')" disabled><i data-lucide="monitor"></i> Tela</button>
-                        <button id="camera-btn" class="btn-action" onclick="setMode('camera')" style="background: var(--secondary);" disabled><i data-lucide="camera"></i> Câmera</button>
+                        <button id="start-btn" class="btn-action" onclick="setMode('screen')" disabled><i data-lucide="monitor"></i> Compartilhar Tela (Navegador)</button>
                     </div>
                     <div id="sender-status" style="margin-top: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; background: rgba(255,255,255,0.05); padding: 0.8rem; border-radius: 12px;">Aguardando técnico...</div>
                 </div>
@@ -256,13 +262,27 @@
 
         function connectToPeer() {
             const id = document.getElementById('remote-id').value.trim();
+            if(!id) return alert('Insira o código');
+            
+            updateStatus('receiver', 'Estabelecendo canal de comando...');
             const conn = peer.connect(id);
             currentConn = conn;
-            updateStatus('receiver', 'Conectando...');
+            
             conn.on('open', () => {
-                updateStatus('receiver', 'Solicitando imagem...');
+                // Ao abrir a conexão, já mostramos a tela de live e ativamos o chat
+                document.getElementById('setup-receiver').style.display = 'none';
+                document.getElementById('live-stream').style.display = 'block';
+                updateStatus('receiver', 'Conectado! Solicitando imagem...');
+                
+                // Envia uma mensagem automática de boas-vindas
+                setTimeout(() => {
+                    conn.send({ type: 'chat', msg: 'Olá! Conexão estabelecida. Como posso ajudar?' });
+                }, 500);
+
                 conn.send({ type: 'request_stream' });
             });
+
+            conn.on('close', () => stopViewing());
         }
 
         function sendPointer(e) {
