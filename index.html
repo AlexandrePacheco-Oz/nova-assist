@@ -7,6 +7,7 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
     <style>
         :root {
             --bg-color: #0a0a0c;
@@ -269,17 +270,16 @@
             currentConn = conn;
             
             conn.on('open', () => {
-                // Ao abrir a conexão, já mostramos a tela de live e ativamos o chat
                 document.getElementById('setup-receiver').style.display = 'none';
                 document.getElementById('live-stream').style.display = 'block';
                 updateStatus('receiver', 'Conectado! Solicitando imagem...');
                 
-                // Envia uma mensagem automática de boas-vindas
+                // Aguarda 1.5 segundos para garantir que o canal de dados está estável
                 setTimeout(() => {
-                    conn.send({ type: 'chat', msg: 'Olá! Conexão estabelecida. Como posso ajudar?' });
-                }, 500);
-
-                conn.send({ type: 'request_stream' });
+                    console.log("Enviando solicitação de stream...");
+                    conn.send({ type: 'request_stream' });
+                    conn.send({ type: 'chat', msg: 'Conectado com sucesso! Por favor, aceite o compartilhamento de tela no seu aparelho.' });
+                }, 1500);
             });
 
             conn.on('close', () => stopViewing());

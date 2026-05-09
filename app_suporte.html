@@ -6,7 +6,8 @@
     <title>Nova Assist - Ferramenta de Suporte</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
     <style>
         :root { --bg: #0f172a; --primary: #3b82f6; --text: #f8fafc; }
         body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
@@ -49,8 +50,11 @@
         </div>
 
         <div class="status-box">
-            <div id="status-text"><span class="pulse"></span> Pronto para conectar</div>
-            <div style="font-size: 0.8rem;">O técnico poderá visualizar sua tela e enviar instruções após a conexão.</div>
+            <div id="status-text"><span class="pulse"></span> Aguardando Técnico...</div>
+            <div style="font-size: 0.8rem; margin-top: 1rem;">Se a tela não aparecer para o técnico, clique abaixo:</div>
+            <button onclick="startTransmission()" class="btn-action" style="margin-top: 1rem; background: var(--primary); padding: 0.8rem; border-radius: 10px; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%;">
+                <i data-lucide="monitor"></i> Compartilhar Tela Agora
+            </button>
         </div>
 
         <button class="btn-stop" onclick="window.close()">Encerrar Suporte</button>
