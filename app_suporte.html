@@ -51,7 +51,14 @@
 
         <div class="status-box">
             <div id="status-text"><span class="pulse"></span> Aguardando Técnico...</div>
-            <div style="font-size: 0.8rem; margin-top: 1rem;">Se a tela não aparecer para o técnico, clique abaixo:</div>
+            <div id="chat-box" style="margin-top: 1rem; text-align: left; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 10px; max-height: 100px; overflow-y: auto; font-size: 0.8rem;">
+                <div style="color: var(--primary); font-weight: bold; margin-bottom: 0.3rem;">Chat de Suporte:</div>
+                <div id="chat-history"></div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                <input type="text" id="client-msg" placeholder="Digite aqui..." style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 0.5rem; border-radius: 5px;">
+                <button onclick="sendClientChat()" style="background: var(--primary); border: none; color: white; padding: 0.5rem; border-radius: 5px; cursor: pointer;"><i data-lucide="send" size="16"></i></button>
+            </div>
             <button onclick="startTransmission()" class="btn-action" style="margin-top: 1rem; background: var(--primary); padding: 0.8rem; border-radius: 10px; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%;">
                 <i data-lucide="monitor"></i> Compartilhar Tela Agora
             </button>
@@ -66,42 +73,56 @@
         lucide.createIcons();
         let peer, currentCall, currentConn, localStream;
 
-        // PeerJS Config
+        // PeerJS Config com TURN Server
         peer = new Peer('nova-' + Math.random().toString(36).substr(2, 6), {
             config: { 
                 iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' }, 
+                    { urls: 'stun:stun.l.google.com:19302' },
                     { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' },
-                    { urls: 'stun:stun3.l.google.com:19302' },
-                    { urls: 'stun:stun4.l.google.com:19302' }
+                    { urls: 'stun:openrelay.metered.ca:80' },
+                    { urls: 'stun:openrelay.metered.ca:443' }
                 ] 
             }
         });
 
-        peer.on('open', (id) => {
-            document.getElementById('my-id').innerText = id;
-        });
-
-        // Escuta conexões do técnico
         peer.on('connection', (conn) => {
             currentConn = conn;
             document.getElementById('status-text').innerHTML = '<span class="pulse" style="background:#3b82f6"></span> Técnico Conectado';
-            
-            // LOG PARA DEBUG
-            console.log("Técnico conectou via canal de dados");
 
             conn.on('data', (data) => {
-                console.log("Dados recebidos:", data);
                 if (data.type === 'request_stream') startTransmission(conn.peer);
                 if (data.type === 'pointer') showPointer(data.x, data.y);
-                if (data.type === 'chat') {
-                    showChat(data.msg);
-                    // Responde para confirmar que recebeu
-                    conn.send({ type: 'chat_ack', status: 'received' });
-                }
+                if (data.type === 'chat') addChatMessage('Técnico', data.msg);
             });
         });
+
+        function addChatMessage(sender, msg) {
+            const history = document.getElementById('chat-history');
+            const div = document.createElement('div');
+            div.innerHTML = `<strong>${sender}:</strong> ${msg}`;
+            history.appendChild(div);
+            history.scrollTop = history.scrollHeight;
+            
+            // Alerta visual flutuante (Opcional)
+            if (sender === 'Técnico') showFloatingMsg(msg);
+        }
+
+        function sendClientChat() {
+            const input = document.getElementById('client-msg');
+            if (!input.value || !currentConn) return;
+            currentConn.send({ type: 'chat', msg: input.value });
+            addChatMessage('Eu', input.value);
+            input.value = '';
+        }
+
+        function showFloatingMsg(msg) {
+            const m = document.createElement('div');
+            m.className = 'chat-msg';
+            m.style.display = 'block';
+            m.innerHTML = `<strong>Técnico:</strong><br>${msg}`;
+            document.body.appendChild(m);
+            setTimeout(() => m.remove(), 8000);
+        }
 
         async function startTransmission(techId) {
             try {
