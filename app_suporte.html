@@ -62,7 +62,7 @@
         lucide.createIcons();
         let peer, currentCall, currentConn, localStream;
 
-        // Auto-Init
+        // PeerJS Config
         peer = new Peer('nova-' + Math.random().toString(36).substr(2, 6), {
             config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] }
         });
@@ -71,14 +71,23 @@
             document.getElementById('my-id').innerText = id;
         });
 
+        // Escuta conexões do técnico
         peer.on('connection', (conn) => {
             currentConn = conn;
             document.getElementById('status-text').innerHTML = '<span class="pulse" style="background:#3b82f6"></span> Técnico Conectado';
             
+            // LOG PARA DEBUG
+            console.log("Técnico conectou via canal de dados");
+
             conn.on('data', (data) => {
+                console.log("Dados recebidos:", data);
                 if (data.type === 'request_stream') startTransmission(conn.peer);
                 if (data.type === 'pointer') showPointer(data.x, data.y);
-                if (data.type === 'chat') showChat(data.msg);
+                if (data.type === 'chat') {
+                    showChat(data.msg);
+                    // Responde para confirmar que recebeu
+                    conn.send({ type: 'chat_ack', status: 'received' });
+                }
             });
         });
 
@@ -87,10 +96,10 @@
                 const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
                 localStream = stream;
                 peer.call(techId, stream);
-                document.getElementById('status-text').innerHTML = '<span class="pulse" style="background:#10b981"></span> Transmitindo ao Vivo';
+                document.getElementById('status-text').innerHTML = '<span class="pulse" style="background:#10b981"></span> Transmissão Ativa';
                 stream.getVideoTracks()[0].onended = () => location.reload();
             } catch (err) {
-                alert('Erro ao compartilhar: ' + err.message);
+                console.error(err);
             }
         }
 
@@ -105,10 +114,26 @@
 
         function showChat(msg) {
             const m = document.createElement('div');
-            m.className = 'chat-msg'; m.innerText = msg;
+            m.className = 'chat-msg';
+            m.style.display = 'block';
+            m.innerHTML = `<strong>Técnico:</strong><br>${msg}`;
             document.body.appendChild(m);
-            setTimeout(() => m.remove(), 8000);
+            
+            // Toca um som ou vibra se possível
+            if (navigator.vibrate) navigator.vibrate(200);
+
+            setTimeout(() => {
+                m.style.opacity = '0';
+                setTimeout(() => m.remove(), 500);
+            }, 10000);
         }
+
+        // Suporte PWA (Para instalação segura)
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
     </script>
 </body>
 </html>

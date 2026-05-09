@@ -1,0 +1,16 @@
+{
+  "name": "Nova Assist Suporte",
+  "short_name": "NovaAssist",
+  "start_url": "app_suporte.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#3b82f6",
+  "description": "Ferramenta de Suporte Remoto Profissional",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3252/3252994.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
