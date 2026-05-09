@@ -3,95 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nova Assist | Baixar Ferramenta de Suporte</title>
+    <title>Nova Assist | Suporte Oficial</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json">
     <style>
-        :root {
-            --bg: #0a0a0c;
-            --primary: #3b82f6;
-            --secondary: #8b5cf6;
-            --text: #f8fafc;
-        }
-        body {
-            margin: 0;
-            background: var(--bg);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background-image: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
-        }
-        .card {
-            background: rgba(255,255,255,0.03);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
-            padding: 3rem;
-            border-radius: 32px;
-            text-align: center;
-            max-width: 500px;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-        }
-        .icon-box {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 2rem;
-            box-shadow: 0 10px 20px var(--primary-glow);
-        }
+        :root { --bg: #0a0a0c; --primary: #3b82f6; --secondary: #8b5cf6; --text: #f8fafc; }
+        body { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; background-image: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%); }
+        .card { background: rgba(255,255,255,0.03); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); padding: 3rem; border-radius: 32px; text-align: center; max-width: 500px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .icon-box { width: 80px; height: 80px; background: linear-gradient(45deg, var(--primary), var(--secondary)); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 2rem; }
         h1 { font-size: 2.5rem; margin-bottom: 1rem; }
         p { color: #94a3b8; line-height: 1.6; margin-bottom: 2.5rem; }
-        
-        .download-btn {
-            background: var(--primary);
-            color: white;
-            text-decoration: none;
-            padding: 1.2rem 2.5rem;
-            border-radius: 16px;
-            font-weight: 700;
-            font-size: 1.1rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.8rem;
-            transition: all 0.3s;
-            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
-        }
-        .download-btn:hover {
-            transform: translateY(-3px);
-            filter: brightness(1.1);
-            box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.5);
-        }
-        .footer { margin-top: 2rem; font-size: 0.85rem; color: #475569; }
+        .btn { background: var(--primary); color: white; text-decoration: none; padding: 1.2rem 2.5rem; border-radius: 16px; font-weight: 700; font-size: 1.1rem; display: inline-flex; align-items: center; gap: 0.8rem; transition: all 0.3s; width: 100%; justify-content: center; border: none; cursor: pointer; margin-bottom: 1rem; }
+        .btn:hover { transform: translateY(-3px); filter: brightness(1.1); }
+        .btn-alt { background: rgba(255,255,255,0.05); color: #fff; }
+        .security-badge { margin-top: 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; color: #34d399; padding: 0.8rem; border-radius: 12px; font-size: 0.85rem; display: flex; align-items: center; gap: 0.5rem; justify-content: center; }
     </style>
 </head>
 <body>
     <div class="card">
-        <div class="icon-box">
-            <i data-lucide="shield-check" color="white" size="40"></i>
-        </div>
+        <div class="icon-box"><i data-lucide="shield-check" color="white" size="40"></i></div>
         <h1>Nova Assist</h1>
-        <p>Para iniciar o suporte remoto, baixe nossa ferramenta rápida e segura. Não requer instalação.</p>
+        <p>Inicie o suporte técnico agora de forma segura. Nosso aplicativo oficial é verificado e não requer privilégios de administrador.</p>
         
-        <a href="NovaAssist.exe" class="download-btn">
-            <i data-lucide="download"></i>
-            Baixar Ferramenta (.exe)
+        <button onclick="installApp()" class="btn">
+            <i data-lucide="plus-circle"></i>
+            Instalar Aplicativo (Recomendado)
+        </button>
+
+        <a href="app_suporte.html" class="btn btn-alt">
+            <i data-lucide="external-link"></i>
+            Acessar via Navegador
         </a>
 
-        <div style="margin-top: 1.5rem; background: rgba(59, 130, 246, 0.1); padding: 1rem; border-radius: 12px; font-size: 0.8rem; color: #94a3b8;">
-            <i data-lucide="info" style="width:14px; vertical-align:middle;"></i>
-            Nota: Esta é a versão web. Para gerar um arquivo .exe personalizado, consulte o guia de compilação.
-        </div>
-
-        <div class="footer">
-            Compatível com Windows 10/11
+        <div class="security-badge">
+            <i data-lucide="shield-check" size="16"></i>
+            Conexão Criptografada e Segura
         </div>
     </div>
-    <script>lucide.createIcons();</script>
+
+    <script>
+        lucide.createIcons();
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+
+        async function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') console.log('User accepted the install prompt');
+                deferredPrompt = null;
+            } else {
+                alert('Para instalar: Clique nos 3 pontinhos do navegador e selecione "Instalar App" ou "Adicionar à tela de início".');
+            }
+        }
+    </script>
 </body>
 </html>
