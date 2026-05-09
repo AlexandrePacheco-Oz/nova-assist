@@ -221,11 +221,19 @@
             });
 
             peer.on('call', (call) => {
+                updateStatus('receiver', 'Recebendo transmissão...');
                 call.answer();
-                call.on('stream', (stream) => {
+                call.on('stream', (remoteStream) => {
                     document.getElementById('setup-receiver').style.display = 'none';
                     document.getElementById('live-stream').style.display = 'block';
-                    document.getElementById('remote-video').srcObject = stream;
+                    const video = document.getElementById('remote-video');
+                    video.srcObject = remoteStream;
+                    
+                    // Força o play do vídeo
+                    video.onloadedmetadata = () => {
+                        video.play().catch(e => console.error("Erro ao dar play:", e));
+                    };
+                    
                     currentCall = call;
                 });
             });
