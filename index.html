@@ -298,7 +298,7 @@
             if(!id) return alert('Insira o código');
             
             updateStatus('receiver', 'Estabelecendo canal de comando...');
-            const conn = peer.connect(id);
+            const conn = peer.connect('nova-' + id.replace(/\s+/g, ''));
             currentConn = conn;
             
             conn.on('open', () => {
