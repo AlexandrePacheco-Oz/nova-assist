@@ -21,12 +21,7 @@
             --error: #ef4444;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
 
         body {
             background-color: var(--bg-color);
@@ -40,254 +35,57 @@
                 radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 40%);
         }
 
-        /* Navbar */
-        nav {
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--card-border);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
+        nav { padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(10px); border-bottom: 1px solid var(--card-border); position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .container { max-width: 1000px; width: 100%; display: flex; flex-direction: column; gap: 2rem; }
+        .glass-card { background: var(--card-bg); backdrop-filter: blur(16px); border: 1px solid var(--card-border); border-radius: 24px; padding: 2.5rem; }
 
-        /* Layout Main */
-        main {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
+        .mode-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .mode-btn { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 2rem; cursor: pointer; transition: all 0.3s; display: flex; flex-direction: column; gap: 1rem; }
+        .mode-btn:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 10px 30px -10px var(--primary-glow); }
+        .mode-btn i { color: var(--primary); width: 32px; height: 32px; }
 
-        .container {
-            max-width: 1000px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
+        .view { display: none; animation: fadeIn 0.5s ease; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Cards */
-        .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--card-border);
-            border-radius: 24px;
-            padding: 2.5rem;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
+        .id-badge { background: rgba(59, 130, 246, 0.1); border: 1px dashed var(--primary); padding: 1rem; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; margin: 1.5rem 0; }
+        .id-text { font-family: monospace; font-size: 1.5rem; font-weight: 700; color: var(--primary); letter-spacing: 2px; }
 
-        .hero-section {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+        .btn-action { background: var(--primary); color: white; border: none; padding: 1rem 2rem; border-radius: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.2s; width: 100%; }
+        .btn-action:hover { filter: brightness(1.1); transform: scale(1.02); }
+        .btn-action:disabled { background: #334155; cursor: not-allowed; }
 
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-        }
+        .input-field { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--card-border); padding: 1rem; border-radius: 12px; color: white; width: 100%; font-size: 1.1rem; outline: none; margin-bottom: 1rem; }
 
-        p.subtitle {
-            color: var(--text-muted);
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
+        .stream-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 20px; overflow: hidden; border: 1px solid var(--card-border); position: relative; }
+        video { width: 100%; height: 100%; object-fit: contain; cursor: crosshair; }
 
-        /* Selection Mode */
-        .mode-selector {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-
-        .mode-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            padding: 2rem;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            text-align: left;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .mode-btn:hover {
-            border-color: var(--primary);
-            background: rgba(59, 130, 246, 0.05);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px -10px var(--primary-glow);
-        }
-
-        .mode-btn i {
-            color: var(--primary);
-            width: 32px;
-            height: 32px;
-        }
-
-        .mode-btn h3 {
-            font-size: 1.4rem;
-            font-weight: 600;
-        }
-
-        .mode-btn p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        /* Interface Views */
-        .view {
-            display: none;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .view.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Components */
-        .id-badge {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px dashed var(--primary);
-            padding: 1rem;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 1.5rem 0;
-        }
-
-        .id-text {
-            font-family: monospace;
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--primary);
-            letter-spacing: 2px;
-        }
-
-        .btn-action {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: all 0.2s;
-        }
-
-        .btn-action:hover {
-            filter: brightness(1.1);
-            transform: scale(1.02);
-        }
-
-        .btn-action:disabled {
-            background: #334155;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .input-field {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--card-border);
-            padding: 1rem;
-            border-radius: 12px;
-            color: white;
-            width: 100%;
-            font-size: 1.1rem;
-            margin-bottom: 1rem;
-            outline: none;
-            transition: border-color 0.2s;
-        }
-
-        .input-field:focus {
-            border-color: var(--primary);
-        }
-
-        /* Stream Container */
-        .stream-container {
-            width: 100%;
-            aspect-ratio: 16/9;
-            background: #000;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 1px solid var(--card-border);
-            position: relative;
-        }
-
-        video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 5px;
-        }
-
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .status-online { background: var(--success); box-shadow: 0 0 10px var(--success); }
         .status-offline { background: var(--error); }
 
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: var(--text-muted);
-            text-decoration: none;
-            margin-bottom: 1.5rem;
-            cursor: pointer;
-        }
+        .pointer { position: absolute; width: 40px; height: 40px; border: 3px solid var(--error); border-radius: 50%; background: rgba(239, 68, 68, 0.3); pointer-events: none; z-index: 1000; transform: translate(-50%, -50%); animation: pulse-pointer 1s infinite; }
+        @keyframes pulse-pointer { 0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } }
 
-        .back-link:hover { color: var(--text-main); }
+        .chat-overlay { position: fixed; bottom: 2rem; right: 2rem; max-width: 350px; z-index: 2000; display: flex; flex-direction: column; gap: 0.8rem; }
+        .chat-msg { background: var(--primary); color: white; padding: 1rem 1.5rem; border-radius: 18px 18px 0 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: slideIn 0.3s ease; font-weight: 500; border: 1px solid rgba(255,255,255,0.1); }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .mode-selector { grid-template-columns: 1fr; }
-            h1 { font-size: 2rem; }
-        }
+        .tech-controls { display: flex; gap: 1rem; margin-top: 1.5rem; }
+        .back-link { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-muted); text-decoration: none; margin-bottom: 1.5rem; cursor: pointer; }
+        .hero-section { text-align: center; margin-bottom: 2rem; }
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .subtitle { color: var(--text-muted); margin-bottom: 1.5rem; }
     </style>
 </head>
 <body>
 
     <nav>
-        <div class="logo">
-            <i data-lucide="shield-check"></i>
-            Nova Assist
-        </div>
-        <div id="connection-status">
+        <div class="logo"><i data-lucide="shield-check"></i> Nova Assist</div>
+        <div>
             <span class="status-dot status-offline" id="peer-status-dot"></span>
             <span id="peer-status-text">Desconectado</span>
         </div>
@@ -295,273 +93,199 @@
 
     <main>
         <div class="container">
-            
-            <!-- Welcome View -->
             <div id="view-welcome" class="view active">
                 <div class="hero-section">
-                    <h1>Como podemos ajudar hoje?</h1>
-                    <p class="subtitle">Escolha uma opção para iniciar o compartilhamento de tela de forma segura e rápida.</p>
+                    <h1>Suporte Remoto Inteligente</h1>
+                    <p class="subtitle">Como no AnyDesk, mas direto no navegador.</p>
                 </div>
-
                 <div class="mode-selector">
                     <div class="mode-btn" onclick="switchView('sender')">
                         <i data-lucide="monitor-up"></i>
                         <h3>Quero Suporte</h3>
-                        <p>Vou compartilhar minha tela para que o técnico possa me ajudar.</p>
+                        <p>Vou compartilhar minha tela/câmera.</p>
                     </div>
                     <div class="mode-btn" onclick="switchView('receiver')">
                         <i data-lucide="eye"></i>
                         <h3>Sou o Técnico</h3>
-                        <p>Vou visualizar a tela de um cliente para prestar suporte.</p>
+                        <p>Vou guiar e visualizar remotamente.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Sender View (Client) -->
+            <!-- Sender View -->
             <div id="view-sender" class="view">
                 <div class="glass-card">
-                    <a onclick="switchView('welcome')" class="back-link">
-                        <i data-lucide="arrow-left"></i> Voltar
-                    </a>
-                    <h2>Compartilhar Minha Tela</h2>
-                    <p class="subtitle" style="margin: 1rem 0;">Passe o código abaixo para o técnico e clique em iniciar quando estiver pronto.</p>
-                    
+                    <a onclick="switchView('welcome')" class="back-link"><i data-lucide="arrow-left"></i> Voltar</a>
+                    <h2>Meu Código de Acesso</h2>
                     <div class="id-badge">
                         <span class="id-text" id="my-id">Gerando...</span>
-                        <button onclick="copyId()" style="background:none; border:none; color:var(--primary); cursor:pointer;">
-                            <i data-lucide="copy"></i>
-                        </button>
+                        <button onclick="copyId()" style="background:none; border:none; color:var(--primary); cursor:pointer;"><i data-lucide="copy"></i></button>
                     </div>
-
                     <div id="mobile-warning" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; color: #fca5a5; font-size: 0.9rem;">
-                        <i data-lucide="alert-triangle" style="width: 16px; height: 16px; vertical-align: middle;"></i>
-                        Nota: No celular, o compartilhamento de tela pode não ser suportado. Use a opção "Compartilhar Câmera" se necessário.
+                        <i data-lucide="alert-triangle"></i> No celular, prefira a **Câmera**.
                     </div>
-
                     <div style="display: flex; gap: 1rem;">
-                        <button id="start-btn" class="btn-action" onclick="startSharing('screen')" disabled>
-                            <i data-lucide="monitor"></i>
-                            Tela
-                        </button>
-                        <button id="camera-btn" class="btn-action" onclick="startSharing('camera')" style="background: var(--secondary);" disabled>
-                            <i data-lucide="camera"></i>
-                            Câmera
-                        </button>
+                        <button id="start-btn" class="btn-action" onclick="setMode('screen')" disabled><i data-lucide="monitor"></i> Tela</button>
+                        <button id="camera-btn" class="btn-action" onclick="setMode('camera')" style="background: var(--secondary);" disabled><i data-lucide="camera"></i> Câmera</button>
                     </div>
-
-                    <div id="sender-status" style="margin-top: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.85rem; background: rgba(0,0,0,0.2); padding: 0.5rem; border-radius: 8px;">
-                        Aguardando conexão do técnico...
-                    </div>
+                    <div id="sender-status" style="margin-top: 1.5rem; text-align: center; color: var(--text-muted); font-size: 0.9rem; background: rgba(255,255,255,0.05); padding: 0.8rem; border-radius: 12px;">Aguardando técnico...</div>
+                </div>
+                <div id="client-overlay" style="display:none; position: fixed; top:0; left:0; width:100vw; height:100vh; pointer-events:none; z-index:1000;">
+                    <div id="pointer-area" style="position:relative; width:100%; height:100%;"></div>
                 </div>
             </div>
 
-            <!-- Receiver View (Technical) -->
+            <!-- Receiver View -->
             <div id="view-receiver" class="view">
-                <div class="glass-card">
-                    <a onclick="switchView('welcome')" class="back-link">
-                        <i data-lucide="arrow-left"></i> Voltar
-                    </a>
-                    
+                <div class="glass-card" style="max-width: 1200px; margin: 0 auto;">
+                    <a onclick="switchView('welcome')" class="back-link"><i data-lucide="arrow-left"></i> Voltar</a>
                     <div id="setup-receiver">
                         <h2>Conectar ao Cliente</h2>
-                        <p class="subtitle" style="margin: 1rem 0;">Insira o código de acesso fornecido pelo seu cliente.</p>
-                        
-                        <input type="text" id="remote-id" class="input-field" placeholder="Ex: nova-1234-abcd">
-                        <button id="connect-btn" class="btn-action" onclick="connectToPeer()">
-                            <i data-lucide="zap"></i>
-                            Conectar Agora
-                        </button>
-                        <div id="receiver-status" style="margin-top: 1rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;"></div>
+                        <input type="text" id="remote-id" class="input-field" placeholder="Insira o código do cliente">
+                        <button id="connect-btn" class="btn-action" onclick="connectToPeer()"><i data-lucide="zap"></i> Conectar Agora</button>
+                        <div id="receiver-status" style="margin-top: 1rem; text-align: center; color: var(--text-muted);"></div>
                     </div>
-
                     <div id="live-stream" style="display: none;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <h2 style="display: flex; align-items: center; gap: 0.5rem;">
-                                <span class="status-dot status-online"></span> Ao Vivo
-                            </h2>
-                            <button onclick="stopViewing()" class="btn-action" style="background: var(--error); width: auto; padding: 0.5rem 1rem;">
-                                Desconectar
-                            </button>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                            <h3 style="display: flex; align-items: center; gap: 0.5rem;"><span class="status-dot status-online"></span> Sessão Ativa</h3>
+                            <button onclick="stopViewing()" class="btn-action" style="background: var(--error); width: auto; padding: 0.5rem 1rem;">Finalizar</button>
                         </div>
                         <div class="stream-container">
-                            <video id="remote-video" autoplay playsinline></video>
+                            <video id="remote-video" autoplay playsinline onclick="sendPointer(event)"></video>
                         </div>
+                        <div class="tech-controls">
+                            <input type="text" id="tech-msg" class="input-field" placeholder="Instrução rápida..." style="margin-bottom:0;" onkeypress="if(event.key==='Enter') sendChat()">
+                            <button class="btn-action" style="width: auto;" onclick="sendChat()"><i data-lucide="send"></i></button>
+                        </div>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.8rem;"><i data-lucide="mouse-pointer-2" style="width:12px;"></i> Clique na imagem para apontar onde o cliente deve clicar.</p>
                     </div>
                 </div>
             </div>
-
         </div>
     </main>
 
-    <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
+    <div class="chat-overlay" id="chat-container"></div>
 
-        let peer;
-        let currentCall;
-        let currentConn;
-        let localStream;
-        let shareType = 'screen';
+    <script>
+        lucide.createIcons();
+        let peer, currentCall, currentConn, localStream, shareType = 'screen';
 
         function updateStatus(view, msg) {
             const el = document.getElementById(view + '-status');
             if (el) el.innerText = msg;
         }
 
-        // Check if Mobile
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        if (isMobile) {
-            document.getElementById('mobile-warning').style.display = 'block';
-        }
+        if (isMobile && document.getElementById('mobile-warning')) document.getElementById('mobile-warning').style.display = 'block';
 
-        // View Navigation
         function switchView(viewId) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById('view-' + viewId).classList.add('active');
-            
-            if ((viewId === 'sender' || viewId === 'receiver') && !peer) {
-                initPeer();
-            }
+            if ((viewId === 'sender' || viewId === 'receiver') && !peer) initPeer();
         }
 
-        // Initialize PeerJS
         function initPeer() {
-            const config = {
+            peer = new Peer('nova-' + Math.random().toString(36).substr(2, 6), {
                 debug: 2,
-                config: {
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun2.l.google.com:19302' },
-                        { urls: 'stun:stun3.l.google.com:19302' },
-                        { urls: 'stun:stun4.l.google.com:19302' },
-                    ]
-                }
-            };
-
-            peer = new Peer('nova-' + Math.random().toString(36).substr(2, 6), config);
+                config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] }
+            });
 
             peer.on('open', (id) => {
                 document.getElementById('my-id').innerText = id;
                 document.getElementById('peer-status-dot').className = 'status-dot status-online';
                 document.getElementById('peer-status-text').innerText = 'Online';
-                
                 document.getElementById('start-btn').disabled = false;
                 document.getElementById('camera-btn').disabled = false;
             });
 
-            // SENDER SIDE: Handle incoming data connection (request for stream)
             peer.on('connection', (conn) => {
                 currentConn = conn;
-                updateStatus('sender', 'Técnico conectado. Aguardando comando...');
-
-                conn.on('data', async (data) => {
-                    if (data.type === 'request_stream') {
-                        updateStatus('sender', 'Técnico solicitou sua ' + (shareType === 'screen' ? 'tela' : 'câmera') + '...');
-                        await startTransmission(conn.peer);
-                    }
+                updateStatus('sender', 'Técnico conectado! Aguardando comando...');
+                conn.on('data', (data) => {
+                    if (data.type === 'request_stream') startTransmission(conn.peer);
+                    if (data.type === 'pointer') showPointer(data.x, data.y);
+                    if (data.type === 'chat') showChat(data.msg);
                 });
             });
 
-            // RECEIVER SIDE: Handle incoming call
             peer.on('call', (call) => {
-                updateStatus('receiver', 'Recebendo transmissão do cliente...');
-                call.answer(); // Answer without stream
-                
-                call.on('stream', (remoteStream) => {
-                    updateStatus('receiver', 'Transmissão ativa!');
+                call.answer();
+                call.on('stream', (stream) => {
                     document.getElementById('setup-receiver').style.display = 'none';
                     document.getElementById('live-stream').style.display = 'block';
-                    
-                    const video = document.getElementById('remote-video');
-                    video.srcObject = remoteStream;
+                    document.getElementById('remote-video').srcObject = stream;
                     currentCall = call;
                 });
             });
 
-            peer.on('error', (err) => {
-                console.error('PeerJS Error:', err);
-                updateStatus('sender', 'Erro: ' + err.type);
-                updateStatus('receiver', 'Erro: ' + err.type);
+            peer.on('error', (err) => { console.error(err); updateStatus('sender', 'Erro: ' + err.type); });
+        }
+
+        async function startTransmission(techId) {
+            try {
+                let stream;
+                if (shareType === 'screen') {
+                    stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                } else {
+                    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                }
+                localStream = stream;
+                peer.call(techId, stream);
+                document.getElementById('client-overlay').style.display = 'block';
+                updateStatus('sender', '✅ Ao Vivo!');
+                stream.getVideoTracks()[0].onended = () => stopSharing();
+            } catch (err) { alert('Erro: ' + err.message); }
+        }
+
+        function showPointer(x, y) {
+            const area = document.getElementById('pointer-area');
+            const p = document.createElement('div');
+            p.className = 'pointer';
+            p.style.left = x + '%'; p.style.top = y + '%';
+            area.appendChild(p);
+            setTimeout(() => p.remove(), 2000);
+        }
+
+        function showChat(msg) {
+            const c = document.getElementById('chat-container');
+            const m = document.createElement('div');
+            m.className = 'chat-msg'; m.innerText = msg;
+            c.appendChild(m);
+            setTimeout(() => m.remove(), 6000);
+        }
+
+        function connectToPeer() {
+            const id = document.getElementById('remote-id').value.trim();
+            const conn = peer.connect(id);
+            currentConn = conn;
+            updateStatus('receiver', 'Conectando...');
+            conn.on('open', () => {
+                updateStatus('receiver', 'Solicitando imagem...');
+                conn.send({ type: 'request_stream' });
             });
         }
 
-        // SENDER LOGIC: Start the media capture and call the technical peer
-        async function startTransmission(techId) {
-            try {
-                updateStatus('sender', 'Iniciando captura de mídia...');
-                let stream;
-                if (shareType === 'screen') {
-                    stream = await navigator.mediaDevices.getDisplayMedia({
-                        video: { cursor: "always" },
-                        audio: false
-                    });
-                } else {
-                    stream = await navigator.mediaDevices.getUserMedia({
-                        video: { facingMode: "environment" },
-                        audio: false
-                    });
-                }
-
-                localStream = stream;
-                const call = peer.call(techId, stream);
-                currentCall = call;
-                
-                updateStatus('sender', '✅ Transmitindo ao vivo para o técnico');
-                document.getElementById('start-btn').disabled = true;
-                document.getElementById('camera-btn').disabled = true;
-
-                stream.getVideoTracks()[0].onended = () => stopSharing();
-            } catch (err) {
-                updateStatus('sender', 'Erro: ' + err.message);
-                if (currentConn) currentConn.send({ type: 'error', message: err.message });
-            }
+        function sendPointer(e) {
+            if (!currentConn) return;
+            const rect = e.target.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            currentConn.send({ type: 'pointer', x, y });
         }
 
-        function startSharing(type) {
-            shareType = type;
-            updateStatus('sender', `Modo ${type === 'screen' ? 'TELA' : 'CÂMERA'} selecionado. Passe o código ao técnico.`);
+        function sendChat() {
+            const i = document.getElementById('tech-msg');
+            if (!i.value || !currentConn) return;
+            currentConn.send({ type: 'chat', msg: i.value });
+            i.value = '';
         }
+
+        function setMode(mode) { shareType = mode; updateStatus('sender', `Modo ${mode==='screen'?'Tela':'Câmera'} pronto.`); }
 
         function stopSharing() {
             if (localStream) localStream.getTracks().forEach(t => t.stop());
-            if (currentCall) currentCall.close();
-            updateStatus('sender', 'Aguardando conexão do técnico...');
-            document.getElementById('start-btn').disabled = false;
-            document.getElementById('camera-btn').disabled = false;
-        }
-
-        // RECEIVER LOGIC: Connect to client via data first, then request stream
-        function connectToPeer() {
-            const remoteId = document.getElementById('remote-id').value.trim();
-            if (!remoteId) return alert('Insira o ID');
-
-            updateStatus('receiver', 'Estabelecendo canal de comando...');
-            const conn = peer.connect(remoteId);
-            currentConn = conn;
-
-            const timeout = setTimeout(() => {
-                if (!conn.open) {
-                    updateStatus('receiver', 'Não foi possível conectar. O cliente está online?');
-                    document.getElementById('connect-btn').disabled = false;
-                }
-            }, 10000);
-
-            conn.on('open', () => {
-                clearTimeout(timeout);
-                updateStatus('receiver', 'Canal aberto. Solicitando imagem...');
-                conn.send({ type: 'request_stream' });
-            });
-
-            conn.on('data', (data) => {
-                if (data.type === 'error') {
-                    alert('Erro no cliente: ' + data.message);
-                    stopViewing();
-                }
-            });
-
-            conn.on('close', () => stopViewing());
-            document.getElementById('connect-btn').disabled = true;
+            document.getElementById('client-overlay').style.display = 'none';
+            updateStatus('sender', 'Conexão encerrada.');
         }
 
         function stopViewing() {
@@ -569,15 +293,9 @@
             if (currentConn) currentConn.close();
             document.getElementById('setup-receiver').style.display = 'block';
             document.getElementById('live-stream').style.display = 'none';
-            document.getElementById('connect-btn').disabled = false;
-            updateStatus('receiver', '');
         }
 
-        function copyId() {
-            const id = document.getElementById('my-id').innerText;
-            navigator.clipboard.writeText(id);
-            alert('Código copiado!');
-        }
+        function copyId() { navigator.clipboard.writeText(document.getElementById('my-id').innerText); alert('Copiado!'); }
     </script>
 </body>
 </html>
