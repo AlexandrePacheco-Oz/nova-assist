@@ -399,6 +399,7 @@
 
         let peer;
         let currentCall;
+        let currentConn;
         let localStream;
         let shareType = 'screen';
 
@@ -425,7 +426,6 @@
 
         // Initialize PeerJS
         function initPeer() {
-            // ICE Servers to help bypass Firewalls (Google STUN)
             const config = {
                 debug: 2,
                 config: {
@@ -433,6 +433,8 @@
                         { urls: 'stun:stun.l.google.com:19302' },
                         { urls: 'stun:stun1.l.google.com:19302' },
                         { urls: 'stun:stun2.l.google.com:19302' },
+                        { urls: 'stun:stun3.l.google.com:19302' },
+                        { urls: 'stun:stun4.l.google.com:19302' },
                     ]
                 }
             };
@@ -440,132 +442,133 @@
             peer = new Peer('nova-' + Math.random().toString(36).substr(2, 6), config);
 
             peer.on('open', (id) => {
-                const idEl = document.getElementById('my-id');
-                if (idEl) idEl.innerText = id;
-                
+                document.getElementById('my-id').innerText = id;
                 document.getElementById('peer-status-dot').className = 'status-dot status-online';
                 document.getElementById('peer-status-text').innerText = 'Online';
                 
-                if (document.getElementById('start-btn')) document.getElementById('start-btn').disabled = false;
-                if (document.getElementById('camera-btn')) document.getElementById('camera-btn').disabled = false;
-                console.log('Peer ID: ' + id);
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('camera-btn').disabled = false;
+            });
+
+            // SENDER SIDE: Handle incoming data connection (request for stream)
+            peer.on('connection', (conn) => {
+                currentConn = conn;
+                updateStatus('sender', 'Técnico conectado. Aguardando comando...');
+
+                conn.on('data', async (data) => {
+                    if (data.type === 'request_stream') {
+                        updateStatus('sender', 'Técnico solicitou sua ' + (shareType === 'screen' ? 'tela' : 'câmera') + '...');
+                        await startTransmission(conn.peer);
+                    }
+                });
+            });
+
+            // RECEIVER SIDE: Handle incoming call
+            peer.on('call', (call) => {
+                updateStatus('receiver', 'Recebendo transmissão do cliente...');
+                call.answer(); // Answer without stream
+                
+                call.on('stream', (remoteStream) => {
+                    updateStatus('receiver', 'Transmissão ativa!');
+                    document.getElementById('setup-receiver').style.display = 'none';
+                    document.getElementById('live-stream').style.display = 'block';
+                    
+                    const video = document.getElementById('remote-video');
+                    video.srcObject = remoteStream;
+                    currentCall = call;
+                });
             });
 
             peer.on('error', (err) => {
                 console.error('PeerJS Error:', err);
                 updateStatus('sender', 'Erro: ' + err.type);
                 updateStatus('receiver', 'Erro: ' + err.type);
-                
-                if (err.type === 'peer-unavailable') {
-                    alert('Código inválido ou cliente desconectado.');
-                    stopViewing();
-                }
-            });
-
-            // Handle incoming calls (Sender side)
-            peer.on('call', async (call) => {
-                updateStatus('sender', 'Solicitação de conexão recebida...');
-                const modeText = shareType === 'screen' ? 'sua tela' : 'sua câmera';
-                
-                if (confirm(`O técnico deseja visualizar ${modeText}. Permitir?`)) {
-                    try {
-                        updateStatus('sender', 'Acessando mídia...');
-                        let stream;
-                        if (shareType === 'screen') {
-                            stream = await navigator.mediaDevices.getDisplayMedia({
-                                video: { cursor: "always" },
-                                audio: false
-                            });
-                        } else {
-                            stream = await navigator.mediaDevices.getUserMedia({
-                                video: { facingMode: "environment" },
-                                audio: false
-                            });
-                        }
-
-                        localStream = stream;
-                        call.answer(stream);
-                        currentCall = call;
-                        
-                        updateStatus('sender', `✅ Transmitindo ${modeText}...`);
-                        document.getElementById('start-btn').disabled = true;
-                        document.getElementById('camera-btn').disabled = true;
-
-                        stream.getVideoTracks()[0].onended = () => stopSharing();
-                    } catch (err) {
-                        console.error('Media Error:', err);
-                        updateStatus('sender', 'Erro ao acessar mídia: ' + err.message);
-                    }
-                } else {
-                    updateStatus('sender', 'Conexão recusada pelo usuário.');
-                }
             });
         }
 
-        // Sender Logic
+        // SENDER LOGIC: Start the media capture and call the technical peer
+        async function startTransmission(techId) {
+            try {
+                updateStatus('sender', 'Iniciando captura de mídia...');
+                let stream;
+                if (shareType === 'screen') {
+                    stream = await navigator.mediaDevices.getDisplayMedia({
+                        video: { cursor: "always" },
+                        audio: false
+                    });
+                } else {
+                    stream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: "environment" },
+                        audio: false
+                    });
+                }
+
+                localStream = stream;
+                const call = peer.call(techId, stream);
+                currentCall = call;
+                
+                updateStatus('sender', '✅ Transmitindo ao vivo para o técnico');
+                document.getElementById('start-btn').disabled = true;
+                document.getElementById('camera-btn').disabled = true;
+
+                stream.getVideoTracks()[0].onended = () => stopSharing();
+            } catch (err) {
+                updateStatus('sender', 'Erro: ' + err.message);
+                if (currentConn) currentConn.send({ type: 'error', message: err.message });
+            }
+        }
+
         function startSharing(type) {
             shareType = type;
-            const modeText = type === 'screen' ? 'TELA' : 'CÂMERA';
-            updateStatus('sender', `Modo ${modeText} pronto. Aguardando técnico...`);
+            updateStatus('sender', `Modo ${type === 'screen' ? 'TELA' : 'CÂMERA'} selecionado. Passe o código ao técnico.`);
         }
 
         function stopSharing() {
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-            }
-            if (currentCall) {
-                currentCall.close();
-            }
+            if (localStream) localStream.getTracks().forEach(t => t.stop());
+            if (currentCall) currentCall.close();
             updateStatus('sender', 'Aguardando conexão do técnico...');
             document.getElementById('start-btn').disabled = false;
             document.getElementById('camera-btn').disabled = false;
         }
 
-        // Receiver Logic
+        // RECEIVER LOGIC: Connect to client via data first, then request stream
         function connectToPeer() {
             const remoteId = document.getElementById('remote-id').value.trim();
-            if (!remoteId) return alert('Por favor, insira o ID do cliente.');
+            if (!remoteId) return alert('Insira o ID');
 
-            updateStatus('receiver', 'Tentando contato com o cliente...');
-            const call = peer.call(remoteId, null);
-            
-            document.getElementById('connect-btn').innerText = 'Conectando...';
-            document.getElementById('connect-btn').disabled = true;
+            updateStatus('receiver', 'Estabelecendo canal de comando...');
+            const conn = peer.connect(remoteId);
+            currentConn = conn;
 
-            // Timeout if connection takes too long
             const timeout = setTimeout(() => {
-                if (document.getElementById('live-stream').style.display === 'none') {
-                    updateStatus('receiver', 'Tempo esgotado. Verifique o código ou a internet do cliente.');
-                    document.getElementById('connect-btn').innerText = 'Conectar Agora';
+                if (!conn.open) {
+                    updateStatus('receiver', 'Não foi possível conectar. O cliente está online?');
                     document.getElementById('connect-btn').disabled = false;
                 }
-            }, 15000);
+            }, 10000);
 
-            call.on('stream', (remoteStream) => {
+            conn.on('open', () => {
                 clearTimeout(timeout);
-                updateStatus('receiver', 'Conexão estabelecida!');
-                document.getElementById('setup-receiver').style.display = 'none';
-                document.getElementById('live-stream').style.display = 'block';
-                
-                const video = document.getElementById('remote-video');
-                video.srcObject = remoteStream;
-                currentCall = call;
+                updateStatus('receiver', 'Canal aberto. Solicitando imagem...');
+                conn.send({ type: 'request_stream' });
             });
 
-            call.on('close', () => stopViewing());
-            
-            call.on('error', (err) => {
-                console.error('Call Error:', err);
-                updateStatus('receiver', 'Erro na chamada: ' + err);
-                stopViewing();
+            conn.on('data', (data) => {
+                if (data.type === 'error') {
+                    alert('Erro no cliente: ' + data.message);
+                    stopViewing();
+                }
             });
+
+            conn.on('close', () => stopViewing());
+            document.getElementById('connect-btn').disabled = true;
         }
 
         function stopViewing() {
             if (currentCall) currentCall.close();
+            if (currentConn) currentConn.close();
             document.getElementById('setup-receiver').style.display = 'block';
             document.getElementById('live-stream').style.display = 'none';
-            document.getElementById('connect-btn').innerText = 'Conectar Agora';
             document.getElementById('connect-btn').disabled = false;
             updateStatus('receiver', '');
         }
@@ -573,7 +576,7 @@
         function copyId() {
             const id = document.getElementById('my-id').innerText;
             navigator.clipboard.writeText(id);
-            alert('Código copiado: ' + id);
+            alert('Código copiado!');
         }
     </script>
 </body>
