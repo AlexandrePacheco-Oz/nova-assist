@@ -333,10 +333,21 @@
                         </button>
                     </div>
 
-                    <button id="start-btn" class="btn-action" onclick="startSharing()" disabled>
-                        <i data-lucide="play"></i>
-                        Iniciar Compartilhamento
-                    </button>
+                    <div id="mobile-warning" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid var(--error); padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem; color: #fca5a5; font-size: 0.9rem;">
+                        <i data-lucide="alert-triangle" style="width: 16px; height: 16px; vertical-align: middle;"></i>
+                        Nota: No celular, o compartilhamento de tela pode não ser suportado. Use a opção "Compartilhar Câmera" se necessário.
+                    </div>
+
+                    <div style="display: flex; gap: 1rem;">
+                        <button id="start-btn" class="btn-action" onclick="startSharing('screen')" disabled>
+                            <i data-lucide="monitor"></i>
+                            Tela
+                        </button>
+                        <button id="camera-btn" class="btn-action" onclick="startSharing('camera')" style="background: var(--secondary);" disabled>
+                            <i data-lucide="camera"></i>
+                            Câmera
+                        </button>
+                    </div>
 
                     <div id="sender-status" style="margin-top: 1.5rem; text-align: center; color: var(--text-muted);">
                         Aguardando conexão do técnico...
@@ -388,15 +399,20 @@
         let peer;
         let currentCall;
         let localStream;
+        let shareType = 'screen';
+
+        // Check if Mobile
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+            document.getElementById('mobile-warning').style.display = 'block';
+        }
 
         // View Navigation
         function switchView(viewId) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById('view-' + viewId).classList.add('active');
             
-            if (viewId === 'sender' && !peer) {
-                initPeer();
-            } else if (viewId === 'receiver' && !peer) {
+            if ((viewId === 'sender' || viewId === 'receiver') && !peer) {
                 initPeer();
             }
         }
@@ -414,43 +430,60 @@
                 document.getElementById('peer-status-dot').className = 'status-dot status-online';
                 document.getElementById('peer-status-text').innerText = 'Online';
                 
-                const startBtn = document.getElementById('start-btn');
-                if (startBtn) startBtn.disabled = false;
+                if (document.getElementById('start-btn')) document.getElementById('start-btn').disabled = false;
+                if (document.getElementById('camera-btn')) document.getElementById('camera-btn').disabled = false;
             });
 
             peer.on('error', (err) => {
                 console.error(err);
-                alert('Erro na conexão: ' + err.type);
+                if (err.type === 'peer-unavailable') {
+                    alert('Código inválido ou cliente desconectado.');
+                    stopViewing();
+                } else {
+                    alert('Erro na conexão: ' + err.type);
+                }
             });
 
             // Handle incoming calls (Sender side)
-            peer.on('call', (call) => {
-                if (confirm('O técnico deseja visualizar sua tela. Permitir?')) {
-                    navigator.mediaDevices.getDisplayMedia({
-                        video: { cursor: "always" },
-                        audio: false
-                    }).then(stream => {
+            peer.on('call', async (call) => {
+                const modeText = shareType === 'screen' ? 'sua tela' : 'sua câmera';
+                if (confirm(`O técnico deseja visualizar ${modeText}. Permitir?`)) {
+                    try {
+                        let stream;
+                        if (shareType === 'screen') {
+                            stream = await navigator.mediaDevices.getDisplayMedia({
+                                video: { cursor: "always" },
+                                audio: false
+                            });
+                        } else {
+                            stream = await navigator.mediaDevices.getUserMedia({
+                                video: { facingMode: "environment" }, // Rear camera
+                                audio: false
+                            });
+                        }
+
                         localStream = stream;
                         call.answer(stream);
                         currentCall = call;
                         
-                        document.getElementById('sender-status').innerText = '✅ Compartilhando tela com o técnico';
+                        document.getElementById('sender-status').innerText = `✅ Compartilhando ${modeText} com o técnico`;
                         document.getElementById('start-btn').disabled = true;
+                        document.getElementById('camera-btn').disabled = true;
 
-                        // Stop sharing when track ends
-                        stream.getVideoTracks()[0].onended = () => {
-                            stopSharing();
-                        };
-                    });
+                        stream.getVideoTracks()[0].onended = () => stopSharing();
+                    } catch (err) {
+                        console.error(err);
+                        alert('Não foi possível acessar a mídia: ' + err.message);
+                    }
                 }
             });
         }
 
         // Sender Logic
-        async function startSharing() {
-            document.getElementById('sender-status').innerText = 'Aguardando o técnico inserir seu código...';
-            // Em WebRTC/PeerJS, o sender geralmente aguarda o receiver ligar.
-            // Mas podemos mostrar um aviso.
+        function startSharing(type) {
+            shareType = type;
+            const modeText = type === 'screen' ? 'TELA' : 'CÂMERA';
+            document.getElementById('sender-status').innerText = `Modo ${modeText} selecionado. Aguardando o técnico...`;
         }
 
         function stopSharing() {
@@ -462,6 +495,7 @@
             }
             document.getElementById('sender-status').innerText = 'Aguardando conexão do técnico...';
             document.getElementById('start-btn').disabled = false;
+            document.getElementById('camera-btn').disabled = false;
         }
 
         // Receiver Logic
@@ -469,12 +503,7 @@
             const remoteId = document.getElementById('remote-id').value;
             if (!remoteId) return alert('Por favor, insira o ID do cliente.');
 
-            // Em PeerJS para Screen Share, o receptor inicia a chamada sem stream 
-            // e espera o sender responder com o stream da tela.
-            // Mas o padrão mais comum é o receptor solicitar.
-            
-            // Vamos usar a lógica de "Call" onde o receptor inicia
-            const call = peer.call(remoteId, null); // Call without sending stream
+            const call = peer.call(remoteId, null);
             
             document.getElementById('connect-btn').innerText = 'Conectando...';
             document.getElementById('connect-btn').disabled = true;
@@ -488,14 +517,7 @@
                 currentCall = call;
             });
 
-            call.on('close', () => {
-                stopViewing();
-            });
-
-            call.on('error', (err) => {
-                alert('Erro ao conectar: ' + err);
-                stopViewing();
-            });
+            call.on('close', () => stopViewing());
         }
 
         function stopViewing() {
