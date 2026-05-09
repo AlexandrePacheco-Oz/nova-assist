@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Nova Assist Desktop</title>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root { --bg: #0f172a; --primary: #3b82f6; --text: #f8fafc; }
+        body { 
+            margin: 0; background: var(--bg); color: var(--text); 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .title-bar { 
+            padding: 1rem; display: flex; justify-content: space-between; 
+            align-items: center; -webkit-app-region: drag;
+            background: rgba(0,0,0,0.2);
+        }
+        .content { padding: 2rem; flex: 1; text-align: center; }
+        .id-card { 
+            background: rgba(59, 130, 246, 0.1); border: 2px dashed var(--primary);
+            padding: 1.5rem; border-radius: 15px; margin: 1.5rem 0;
+        }
+        .id-number { font-size: 2.2rem; font-weight: 800; color: var(--primary); letter-spacing: 4px; }
+        .btn-close { 
+            background: #ef4444; color: white; border: none; 
+            padding: 0.8rem; width: 100%; border-radius: 10px; 
+            font-weight: 700; cursor: pointer; -webkit-app-region: no-drag;
+        }
+        .status-msg { font-size: 0.85rem; color: #94a3b8; margin-top: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="title-bar">
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="shield-check" color="#3b82f6"></i>
+            <strong>Nova Assist Support</strong>
+        </div>
+        <div onclick="window.close()" style="cursor: pointer; -webkit-app-region: no-drag;">
+            <i data-lucide="x" size="20"></i>
+        </div>
+    </div>
+
+    <div class="content">
+        <h2 style="margin: 0;">Aguardando Suporte</h2>
+        <p style="color: #64748b; font-size: 0.9rem;">Informe o código abaixo para o técnico iniciar o acesso.</p>
+
+        <div class="id-card">
+            <div style="font-size: 0.7rem; text-transform: uppercase; margin-bottom: 0.5rem;">Seu Código de Acesso</div>
+            <div class="id-number" id="my-id">--- ---</div>
+        </div>
+
+        <div id="status-area">
+            <div class="status-msg" id="status-text">Conectando à rede segura...</div>
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <button class="btn-close" onclick="window.close()">Encerrar Sessão</button>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        lucide.createIcons();
+        
+        let peer, currentConn;
+
+        peer = new Peer('nova-' + Math.random().toString(36).substr(2, 6));
+
+        peer.on('open', (id) => {
+            document.getElementById('my-id').innerText = id;
+            document.getElementById('status-text').innerText = 'Online. Pronto para conexão.';
+        });
+
+        peer.on('connection', (conn) => {
+            currentConn = conn;
+            document.getElementById('status-text').innerHTML = '<span style="color:#10b981">●</span> Técnico Conectado';
+
+            conn.on('data', (data) => {
+                // Se receber um comando de controle remoto, repassa para o processo principal
+                if (data.type === 'mouse' || data.type === 'key') {
+                    ipcRenderer.send('remote-control', data);
+                }
+                
+                if (data.type === 'request_stream') {
+                    startStreaming(conn.peer);
+                }
+            });
+        });
+
+        async function startStreaming(techId) {
+            try {
+                // No Electron, podemos usar o desktopCapturer para pegar a tela inteira sem perguntar
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: false,
+                    video: {
+                        mandatory: {
+                            chromeMediaSource: 'desktop',
+                            minWidth: 1280,
+                            maxWidth: 1920,
+                            minHeight: 720,
+                            maxHeight: 1080
+                        }
+                    }
+                });
+                peer.call(techId, stream);
+                document.getElementById('status-text').innerText = 'Transmitindo tela...';
+            } catch (err) {
+                // Fallback caso a permissão de desktopCapturer não esteja setada
+                const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+                peer.call(techId, stream);
+            }
+        }
+    </script>
+</body>
+</html>

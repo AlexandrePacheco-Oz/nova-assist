@@ -295,7 +295,17 @@
             const rect = e.target.getBoundingClientRect();
             const x = ((e.clientX - rect.left) / rect.width) * 100;
             const y = ((e.clientY - rect.top) / rect.height) * 100;
+            
+            // Envia para o ponteiro visual (Guia)
             currentConn.send({ type: 'pointer', x, y });
+            
+            // Envia para o Controle Remoto Real (Desktop App)
+            currentConn.send({ 
+                type: 'mouse', 
+                action: 'click',
+                x_percent: x, 
+                y_percent: y 
+            });
         }
 
         function sendChat() {
